@@ -101,7 +101,6 @@ class ExampleClient(WebSocketClient):
                 plt.grid(True)
                 plt.show()
 
-
 if __name__ == '__main__':
     try:
         ws = ExampleClient('ws://127.0.0.1:23456/game/client1')
