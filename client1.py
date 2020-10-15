@@ -33,7 +33,8 @@ class ExampleClient(WebSocketClient):
     # 两个列表做减法
     def listMinus(self, list1, list2):
         for item in list2:
-            list1.remove(item)
+            if item in list1:
+                list1.remove(item)
         return list1
 
     # 输入动作三元组来更新剩余卡片
@@ -48,7 +49,6 @@ class ExampleClient(WebSocketClient):
             self.restCards += cards
         else:                                            # 其余情况：正常出牌
             self.listMinus(self.restCards, cards)
-
 
     def received_message(self, message):
         message = json.loads(str(message))                                    # 先序列化收到的消息，转为Python中的字典
@@ -84,27 +84,29 @@ class ExampleClient(WebSocketClient):
             act_trip = message["actionList"][act_index]
             # 更新手牌
             self.updateRestCards(act_trip)
-
             self.send(json.dumps({"actIndex": act_index}))
+
+        if message["stage"] == "gameResult":
+            # 训练模式将结果打印出来
+            if train:
+                import matplotlib.pyplot as plt
+                import pandas as pd
+
+                data_df = pd.DataFrame({
+                    "name": ["agent0", "agent1", "agent2", "agent3"],
+                    "count": list(first_end_agent_count.values())
+                })
+
+                data_df.plot(x="name", y="count", kind="bar", figsize=[12, 7])
+                plt.grid(True)
+                plt.show()
+
 
 if __name__ == '__main__':
     try:
         ws = ExampleClient('ws://127.0.0.1:23456/game/client1')
         ws.connect()
         ws.run_forever()
+
     except KeyboardInterrupt:
         ws.close()
-
-    # 训练模式将结果打印出来
-    if train:
-        import matplotlib.pyplot as plt
-        import pandas as pd
-
-        data_df = pd.DataFrame({
-            "name": ["agent0", "agent1", "agent2", "agent3"],
-            "count": list(first_end_agent_count.values())
-        })
-
-        data_df.plot(x="name", y="count", kind="bar", figsize=[12, 7])
-        plt.grid(True)
-        plt.show()
