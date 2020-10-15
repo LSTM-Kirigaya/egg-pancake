@@ -34,13 +34,19 @@ card_type_mapping = {
     "PASS": 9
 }
 
+# 我们认为的大牌型
+big_type_cards = [
+    "Straight", "Bomb", "StraightFlush"
+]
+
 class AIAction(object):
     def __init__(self):
         self.actionList = []               # 当前的动作列表
         self.act_range = -1              # 动作索引范围
         self.restCards = []               # agent剩余手牌
         self.starting_threshold = 5  # 开局阈值，在该值之前AI认为是“刚刚开局”
-
+        self.episode_rounds = 0       # 回合数
+        self.agent_pos = None         # 位置
 
     # 统计列表中的词频，并返回字典
     def count(self, list):
@@ -54,24 +60,49 @@ class AIAction(object):
         if msg["indexRange"] == 0:      # 别无选择
             return 0
 
-        if self.actionList[0][0] == "PASS":     # 接牌
-            pass
+        # 接牌
+        if self.actionList[0][0] == "PASS":
+            if msg["greaterPos"] == (self.agent_pos + 2) % 4:     # 如果最大牌是队友出的
+                return self.greaterPosIsFriendStrategy(msg)
+            else:                                                                               # 如果最大牌是对手出的
+                return self.greaterPosIsOpponentStrategy(msg)
 
+        # 出牌
+        else:
+            if self.episode_rounds <= self.starting_threshold:        # 大局出牌
+                return self.smallRoundsPlayOutStrategy(msg)
+            else:
+                return self.bigRoundsPlayOutStrategy(msg)             # 小局出牌
 
-        else:                                                       # 出牌
-            pass
-        # 开始几局不打打牌
+    # 点数最大是队友出的策略
+    def greaterPosIsFriendStrategy(self, msg):
+        if msg["greaterAction"][0] in big_type_cards:       # 队友出的牌型属于大牌
+            return 0            # 返回PASS
+        else:                                                                        # 队友出的牌型属于小牌
+            return 1            # 返回剩余卡牌中最小的那个
 
+    # 点数最大是对手出的策略
+    def greaterPosIsOpponentStrategy(self, msg):
+        if self.episode_rounds <= self.starting_threshold:      # 回合数较小
+            if msg["actionList"][1] in big_type_cards:          # agent能选的只有大牌
+                return 0        # 返回PASS
+            else:                                                                     # agent能选的有小牌
+                return 1        # 返回剩余卡牌中最小的那个
+        else:                                                                              # 回合数较大
+            return 1
 
-        # 选择card_type_mapping映射中最小的那个牌型
-        # 选择选择牌型中数量最少的那个
+    # 出牌时，回合数较小的策略
+    def smallRoundsPlayOutStrategy(self, msg):
+        return 0
 
+    # 出牌时，回合数较大的策略
+    def bigRoundsPlayOutStrategy(self, msg):
+        return 0
 
-
-
-
-    def parse(self, msg, restCards):
+    def parse(self, msg, restCards, episode_rounds, agent_pos):
         self.restCards = restCards
+        self.episode_rounds = episode_rounds
+        self.agent_pos = agent_pos
         # 获取message中的内容
         self.actionList = msg["actionList"]
         self.act_range = msg["indexRange"]
@@ -80,7 +111,11 @@ class AIAction(object):
         action_index = self.strategy_predict(msg)
 
         print(self.actionList)          # 打印动作列表
-        print("可选动作范围为：0至{}， AI认为应该选择{}".format(self.act_range, action_index))
-        action_index = input("你认为应该的动作索引：")
+        print("-" * 20)
+        print("目前回合数：{}\t可选动作范围为：0至{}\tAI认为应该选择{}".format(
+            self.episode_rounds, self.act_range, action_index
+        ))
+
+        #action_index = int(input("你认为应该的动作索引："))
 
         return action_index
