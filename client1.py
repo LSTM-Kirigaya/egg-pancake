@@ -37,19 +37,6 @@ class ExampleClient(WebSocketClient):
                 list1.remove(item)
         return list1
 
-    # 输入动作三元组来更新剩余卡片
-    def updateRestCards(self, act_trip):
-        # 牌型、点数、卡牌
-        card_type, card_num, cards = act_trip
-        if card_type == "PASS":             # 过
-            pass
-        elif card_type == "tribute":        # 进贡
-            self.listMinus(self.restCards, cards)
-        elif card_type == "back":           # 还贡
-            self.restCards += cards
-        else:                                            # 其余情况：正常出牌
-            self.listMinus(self.restCards, cards)
-
     def received_message(self, message):
         message = json.loads(str(message))                                    # 先序列化收到的消息，转为Python中的字典
         self.state.parse(message)                                                     # 调用状态对象来解析状态
@@ -70,6 +57,7 @@ class ExampleClient(WebSocketClient):
 
         # 目前存在可选动作列表，代表目前可以打牌
         if "actionList" in message:
+            self.restCards = message["handCards"]
             # 回合数+1
             self.episode_rounds += 1
             print("剩余卡牌：", self.restCards)
@@ -82,8 +70,6 @@ class ExampleClient(WebSocketClient):
 
             # 得到代表打牌动作的三元组
             act_trip = message["actionList"][act_index]
-            # 更新手牌
-            self.updateRestCards(act_trip)
             self.send(json.dumps({"actIndex": act_index}))
 
         if message["stage"] == "gameResult":

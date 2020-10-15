@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# @Time       : 2020/10/15 18:10
+# @Time       : 2020/10/1 16:30
 # @Author     : Zhelong Huang
-# @File       : client3.py
+# @File       : client.py
 # @Description:
 
 import json
@@ -13,7 +13,7 @@ episode_result_list = []    # 记录每个小局结束时的记录
 first_end_agent_count = {
     0 : 0, 1 : 0, 2 : 0, 3 : 0
 }      # 统计每个agent出完牌的次数
-train = True
+train = False
 
 class ExampleClient(WebSocketClient):
     def __init__(self, url):
@@ -37,19 +37,6 @@ class ExampleClient(WebSocketClient):
                 list1.remove(item)
         return list1
 
-    # 输入动作三元组来更新剩余卡片
-    def updateRestCards(self, act_trip):
-        # 牌型、点数、卡牌
-        card_type, card_num, cards = act_trip
-        if card_type == "PASS":             # 过
-            pass
-        elif card_type == "tribute":        # 进贡
-            self.listMinus(self.restCards, cards)
-        elif card_type == "back":           # 还贡
-            self.restCards += cards
-        else:                                            # 其余情况：正常出牌
-            self.listMinus(self.restCards, cards)
-
     def received_message(self, message):
         message = json.loads(str(message))                                    # 先序列化收到的消息，转为Python中的字典
         self.state.parse(message)                                                     # 调用状态对象来解析状态
@@ -70,6 +57,7 @@ class ExampleClient(WebSocketClient):
 
         # 目前存在可选动作列表，代表目前可以打牌
         if "actionList" in message:
+            self.restCards = message["handCards"]
             # 回合数+1
             self.episode_rounds += 1
             print("剩余卡牌：", self.restCards)
@@ -82,8 +70,6 @@ class ExampleClient(WebSocketClient):
 
             # 得到代表打牌动作的三元组
             act_trip = message["actionList"][act_index]
-            # 更新手牌
-            self.updateRestCards(act_trip)
             self.send(json.dumps({"actIndex": act_index}))
 
         if message["stage"] == "gameResult":
@@ -103,7 +89,7 @@ class ExampleClient(WebSocketClient):
 
 if __name__ == '__main__':
     try:
-        ws = ExampleClient('ws://127.0.0.1:23456/game/client1')
+        ws = ExampleClient('ws://127.0.0.1:23456/game/client3')
         ws.connect()
         ws.run_forever()
 
