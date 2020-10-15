@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # @Time       : 2020/10/1 16:30
-# @Author     : Duofeng Wu
+# @Author     : Zhelong Huang
 # @File       : client.py
 # @Description:
 
