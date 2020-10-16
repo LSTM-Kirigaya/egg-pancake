@@ -37,6 +37,38 @@ class ExampleClient(WebSocketClient):
                 list1.remove(item)
         return list1
 
+    # 获取奖励值
+    # 普通一回合，奖励值=对方剩余卡牌数-己方剩余卡牌数
+    # 小局结束， 如果赢了，（AABB）奖励值=1500, (ABAB)奖励值= 1000(ABBA)奖励值=500
+    # 输了， (BBAA)奖励值=-1500 (BABA)奖励值=-1000, (BAAB)=-500
+    def calculate_reward(self, msg):
+        em1 = (self.agent_pos + 1) % 4
+        em2 = (self.agent_pos + 3) % 4
+        self1 = self.agent_pos
+        self2 = (self.agent_pos + 2) % 4
+
+        if msg["stage"] == "play":
+            em_rest_card_num = msg["publicInfo"][em1]["rest"] + msg["publicInfo"][em2]["rest"]
+            self_rest_card_num = msg["publicInfo"][self1]["rest"] + msg["publicInfo"][self2]["rest"]
+            return em_rest_card_num - self_rest_card_num
+
+        elif msg["stage"] == "episodeOver":
+            if msg["order"][0] in [self1, self2] and msg["order"][1] in [self1, self2]:
+                return 1500
+            elif msg["order"][0] in [self1, self2] and msg["order"][2] in [self1, self2]:
+                return 1000
+            elif msg["order"][0] in [self1, self2] and msg["order"][3] in [self1, self2]:
+                return 500
+            elif msg["order"][0] in [em1, em2] and msg["order"][1] in [em1, em2]:
+                return -1500
+            elif msg["order"][0] in [em1, em2] and msg["order"][2] in [em1, em2]:
+                return -1000
+            elif msg["order"][0] in [em1, em2] and msg["order"][3] in [em1, em2]:
+                return -500
+
+    def calculate_observation(self, msg):
+        return
+
     def received_message(self, message):
         message = json.loads(str(message))                                    # 先序列化收到的消息，转为Python中的字典
         self.state.parse(message)                                                     # 调用状态对象来解析状态
