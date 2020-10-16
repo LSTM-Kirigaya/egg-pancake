@@ -76,8 +76,8 @@ class AIAction(object):
             target_dict[item] = target_dict.get(item, 1) + 1
         return target_dict
 
-    # 判断选中的卡牌动作是否拆牌
-    def splitCards(self, msg, choose_card_trips, rest_cards):
+    # 判断选中的卡牌动作是否合理
+    def is_correct(self, msg, choose_card_trips, rest_cards):
         """
         :param msg: 全局信息
         :param choose_card_trips: agent选择的卡牌三元组
@@ -99,12 +99,12 @@ class AIAction(object):
 
         cur_card_num = card2num[cards[0]]
         if (cur_card_num == 1 or cur_card_num == int(msg["curRank"])) and card_count[card2num[cards[0]]] == 3 and (count == 1 or count == 2):
-            flag = True
+            flag = False
 
         if card_count[card2num[cards[0]]] == count:     # 如果卡牌数和剩余数量相等，则没有拆牌
-            flag = False
-        else:
             flag = True
+        else:
+            flag = False
 
         return flag
 
