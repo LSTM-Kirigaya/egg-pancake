@@ -4,6 +4,45 @@
 # @File       : client.py
 # @Description:
 
+# 根据牌的类型给出其映射序号
+card_type_mapping = {
+    "Single": 0,
+    "Pair": 1,
+    "Trips": 2,
+    "ThreePair": 3,
+    "ThreeWithTwo": 4,
+    "TwoTrips": 5,
+    "Straight": 6,
+    "Bomb": 7,
+    "StraightFlush": 8,
+    "PASS": 9
+}
+
+# 我们认为的大牌型
+big_type_cards = [
+    "Straight", "Bomb", "StraightFlush"
+]
+
+# 牌到点数的映射
+card2num = {
+    "SA":1,"HA":1,"CA":1,"DA":1,
+    "S2":2,"H2":2,"C2":2,"D2":2,
+    "S3":3,"H3":3,"C3":3,"D3":3,
+    "S4":4,"H4":4,"C4":4,"D4":4,
+    "S5":5,"H5":5,"C5":5,"D5":5,
+    "S6":6,"H6":6,"C6":6,"D6":6,
+    "S7":7,"H7":7,"C7":7,"D7":7,
+    "S8":8,"H8":8,"C8":8,"D8":8,
+    "S9":9,"H9":9,"C9":9,"D9":9,
+    "ST":10,"HT":10,"CT":10,"DT":10,
+    "SJ":11,"HJ":11,"CJ":11,"DJ":11,
+    "SQ":12,"HQ":12,"CQ":12,"DQ":12,
+    "SK":13,"HK":13,"CK":13,"DK":13,
+    "SB":14,       #小王映射成14，大王映射成15
+    "HR":15,
+    "PASS":0       #PASS 映射成0
+}
+
 import json
 from ws4py.client.threadedclient import WebSocketClient
 from state import State
@@ -67,6 +106,10 @@ class ExampleClient(WebSocketClient):
                 return -500
 
     def calculate_observation(self, msg):
+        if msg["stage"] == "play":
+            pass
+
+
         return
 
     def received_message(self, message):

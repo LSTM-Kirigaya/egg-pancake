@@ -108,6 +108,10 @@ class AIAction(object):
 
         return flag
 
+    # 通过回手牌获取出牌时选的牌型
+    # 判断是否有回手牌
+    def chooseType(self, msg):
+        return
 
     # 策略算法预测
     def strategy_predict(self, msg):
