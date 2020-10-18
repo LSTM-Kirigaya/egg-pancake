@@ -6,16 +6,16 @@
 
 # 根据牌的类型给出其映射序号
 card_type_mapping = {
-    "Single": 0,
-    "Pair": 1,
-    "Trips": 2,
-    "ThreePair": 3,
-    "ThreeWithTwo": 4,
-    "TwoTrips": 5,
-    "Straight": 6,
-    "Bomb": 7,
-    "StraightFlush": 8,
-    "PASS": 9
+    "Single": 1,
+    "Pair": 2,
+    "Trips": 3,
+    "ThreePair": 4,
+    "ThreeWithTwo": 5,
+    "TwoTrips": 6,
+    "Straight": 7,
+    "Bomb": 8,
+    "StraightFlush": 9,
+    "PASS": 0
 }
 
 # 我们认为的大牌型

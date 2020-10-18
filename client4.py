@@ -34,8 +34,8 @@ class ExampleClient(WebSocketClient):
             self.agent_pos = message["myPos"]
 
         if "actionList" in message:                                           # 需要做出动作选择时调用动作对象进行解析
-            message = check_message(message=message,
-                                      pos=self.agent_pos)
+            # message = check_message(message=message,
+            #                           pos=self.agent_pos)
             act_index = self.action.parse(message)
             self.send(json.dumps({"actIndex": act_index}))
 
