@@ -54,7 +54,6 @@ class ExampleClient(WebSocketClient):
             episode_result_list.append(message["order"])     # 保留第一个出完牌的agent
             first_end_agent_count[message["order"][0]] += 1     # 计数器+1
 
-
         # 目前存在可选动作列表，代表目前可以打牌
         if "actionList" in message:
             self.restCards = message["handCards"]

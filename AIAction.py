@@ -143,7 +143,9 @@ class AIAction(object):
         #不知道为什么每一张都多一个，先减掉
         for item in card_count :
             card_count[item]-=1
-    
+
+        count =123
+
         # 判断卡牌类型
         if card_type == "Single":
             count = 1                       #count 记录的是卡牌数量
@@ -330,7 +332,8 @@ class AIAction(object):
 
         rest_cards=msg["handCards"]         #剩余手牌
         card_count = self.count(rest_cards) # 获取剩余卡牌的各点数卡牌数量
-        
+
+
         #可选牌型列表
         choice_list=[]
         
@@ -444,37 +447,32 @@ class AIAction(object):
 
     #这个函数帮助我们进行优先选择，需要传入一个类型列表，会返回经过检验拆牌的最小的合理选择
     def FirstChoice (self,msg,Choice_list):
-
-        for index in range(len(msg['actionList'])):
-            if msg['actionList'][index][0] in Choice_list:
-                if self.will_choice_break_other(msg,index) == False:
-                    return index
+        for index, action in enumerate(msg["actionList"]):
+            if action[0] in Choice_list and self.will_choice_break_other(msg, index) == False:
+                return index
         return -1
     
     #当我们主动出牌时
-    def active_play_out(self,msg):
-
-
-        emery_rest1=msg["publicInfo"][(self.agent_pos+1)%4]     #提取出对手出牌信息的字典
-        emery_rest2=msg["publicInfo"][(self.agent_pos+3)%4]
-        min_rest=min(emery_rest1["rest"],emery_rest2["rest"])   #提取出场上对手牌数最少的值
+    def active_play_out(self, msg):
+        emery_rest1 = msg["publicInfo"][(self.agent_pos+1)%4]     #提取出对手出牌信息的字典
+        emery_rest2 = msg["publicInfo"][(self.agent_pos+3)%4]
+        min_rest = min(emery_rest1["rest"],emery_rest2["rest"])   #提取出场上对手牌数最少的值
               
         if min_rest >10 :
-
             #优先选择回手牌策略
             can_choice=self.static_back_hand(msg)
             if "Single" in can_choice:
-                flag=self.FirstChoice(msg,["Single"])
+                flag = self.FirstChoice(msg,["Single"])
                 if flag != -1:
                     return flag
 
             if "Pair" in can_choice:
-                flag=self.FirstChoice(msg,["Pair"])
+                flag = self.FirstChoice(msg,["Pair"])
                 if flag != -1:
                     return flag
 
             if "ThreeWithTwo" in can_choice:
-                flag=self.FirstChoice(msg,["ThreeWithTwo"])
+                flag = self.FirstChoice(msg,["ThreeWithTwo"])
                 if flag != -1:
                     return flag
 
@@ -519,9 +517,8 @@ class AIAction(object):
             return randint(1,msg["indexRange"])
 
         #elif min_rest >=10 and min_rest <=17:
-            
 
-        elif min_rest < 10:
+        elif min_rest <= 10:
             
             if min_rest == 1: #只剩一张牌了
                 for index in range(len(msg['actionList'])):
@@ -567,7 +564,6 @@ class AIAction(object):
                 return randint(1,msg["indexRange"])
 
             elif min_rest==4 or min_rest==5: #如果剩余了四张或者五张牌
-
 
                 Choice_list1 = [ "TwoTrips","ThreePair","Straight"]
                 Choice_list2 = [ "Trips"]
@@ -650,9 +646,4 @@ class AIAction(object):
         ))
 
         # action_index = int(input("你认为应该的动作索引："))
-        if action_index <= len(msg["actionList"]) - 1:
-            return action_index
-        else:
-            return len(msg["actionList"]) - 1 
-
-
+        return min(action_index, len(msg["actionList"] ) - 1)
